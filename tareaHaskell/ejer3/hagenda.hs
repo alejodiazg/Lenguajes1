@@ -37,6 +37,12 @@ beside2 _ _ = error ("cant beside different heights")
 toString :: Picture -> String
 toString = concat . (map (\x -> (foldr (:) ['\n'] x ))) . pixels
 
+stack :: [Picture] -> Picture
+stack = foldr1 above
+
+spread :: [Picture] -> Picture
+spread = foldr1 beside2
+
 a = Picture 1 1 [['a']]
 b = Picture 1 1 [['b']]
 ab = above a b
