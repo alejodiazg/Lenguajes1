@@ -2,6 +2,14 @@ data SuffixTree = Leaf Int
                 | Node [(String,SuffixTree)]
                 deriving (Eq,Ord,Show)
 
+t1 :: SuffixTree
+t1 = Node [("banana", Leaf 0),
+		("a", Node [("na", Node [("na", Leaf 1),
+						("", Leaf 3)]),
+				("", Leaf 5)]),
+			("na", Node [("na", Leaf 2),
+				("", Leaf 4)])]
+
 isPrefix :: String -> String -> Bool
 isPrefix [] _           = True
 isPrefix _ []           = False
@@ -31,14 +39,17 @@ findSubstrings xs ys = f xs ys 0
    		  | (isPrefix xs ys) = n : f xs (tail ys) (n+1)
 		f xs ys n = f xs (tail ys) (n+1)
 
---f :: String -> String -> Int -> [Int]
---f _ [] _ = []
---f xs ys n
---   | (isPrefix xs ys) = n : f xs (tail ys) (n+1)
---f xs ys n = f xs (tail ys) (n+1)
-
+--BUSCAR FORMA DE HACER ESTO CON (:)
 getIndices :: SuffixTree -> [Int]
+getIndices (Node []) = []
+getIndices (Node ((s,t):ys)) = getIndices2 t ++ getIndices2 (Node ys) 
 getIndices (Leaf n) = [n]
-getIndices (Node ((s,t):ys)) 
-   | ys == [] = getIndices(t)
-getIndices (Node ((s,t):ys)) = getIndices(t) ++ getIndices(Node ys)
+
+getIndices2 :: SuffixTree -> [Int]
+getIndices2 (Node ((s,t):ys)) = foldr f (getIndices2 t) [(Node (ys))] --getIndices2 t ++ getIndices2 (Node ys)
+	where
+		f (Node ((s,t):ys)) = (++) (getIndices2 t ++ getIndices2 (Node ys))
+		f (Node []) = (++) []
+		f (Leaf n) = (++) [n]
+getIndices2 (Leaf n) = [n]
+getIndices2 _ = []
