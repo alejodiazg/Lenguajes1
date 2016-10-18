@@ -8,6 +8,30 @@ data Picture = Picture {
 				pixels :: [[Char]]
 			} deriving (Show)
 
+type Day = Int -- Suponga que está entre 1 y 31
+type Year = Int -- Suponga que es positivo
+data Month = Enero
+  | Febrero
+  | Marzo
+  | Abril
+  | Mayo
+  | Junio
+  | Julio
+  | Agosto
+  | Septiembre
+  | Octubre
+  | Noviembre
+  | Diciembre
+  deriving (Show,Eq,Ord,Enum)
+
+data DayName = Domingo
+  | Lunes
+  | Martes
+  | Miercoles
+  | Jueves
+  | Viernes
+  | Sabado
+  deriving (Show,Eq,Ord,Enum)
 
 pixel :: Char -> Picture
 pixel c = (Picture 1 1 [[c]])
@@ -67,7 +91,38 @@ tileWith (h , w) = f  . map (spreadWith w)
   where 
     f = stackWith h
 
+
 --Segunda Parte
+
+
+leap:: Year -> Bool --REVISAR
+leap y = ((mod y 4 == 0) && (mod y 100 /= 0)) || ((mod y 4 == 0) && (mod y 100 == 0) && (mod y 400 == 0))
+
+mlenghts :: Year -> [Day]
+mlenghts y = [31 , f , 31 , 30 , 31 , 30 , 31 , 31 , 30 , 31 , 30 , 31]
+  where 
+    f = if leap y
+      then 29
+      else 28
+
+jan1 :: Year -> DayName
+jan1 y = toEnum  d::DayName --(mod (y*365 + ( div (y-1) 4)) 7)::DayName
+  where
+    a = div (14 - 1) 12
+    year = y - a
+    m = 1 + 12*a - 2
+    d = mod (1 + year + div year 4 - div year 100 + div year 400 + div (31*m) 12)  7
+
+mtotals :: Year -> [Int]
+mtotals y = f (fromEnum (jan1 y)::Int) (0:mlenghts y)
+  where
+    f n (x:xs) = (x+n) : f (x+n) xs
+    f n _ = []  
+
+fstdays :: Year -> [DayName]
+fstdays y = map (\x -> toEnum (mod x 7)::DayName) (filter (\x -> x < 360) (mtotals y)) --buscar otra forma de omitir el ultimo elemento
+
+
 
 
 --PARA PROBAR
