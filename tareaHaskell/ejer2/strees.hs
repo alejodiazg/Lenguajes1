@@ -39,17 +39,17 @@ findSubstrings xs ys = f xs ys 0
    		  | (isPrefix xs ys) = n : f xs (tail ys) (n+1)
 		f xs ys n = f xs (tail ys) (n+1)
 
---BUSCAR FORMA DE HACER ESTO CON (:)
 getIndices :: SuffixTree -> [Int]
-getIndices (Node []) = []
-getIndices (Node ((s,t):ys)) = getIndices2 t ++ getIndices2 (Node ys) 
+getIndices (Node ((s,t):ys)) = foldr (\x -> (++) (getIndices (snd x))) (getIndices t) ys
 getIndices (Leaf n) = [n]
 
-getIndices2 :: SuffixTree -> [Int]
-getIndices2 (Node ((s,t):ys)) = foldr f (getIndices2 t) [(Node (ys))] --getIndices2 t ++ getIndices2 (Node ys)
-	where
-		f (Node ((s,t):ys)) = (++) (getIndices2 t ++ getIndices2 (Node ys))
-		f (Node []) = (++) []
-		f (Leaf n) = (++) [n]
-getIndices2 (Leaf n) = [n]
-getIndices2 _ = []
+
+--findSubstrings' s st = f s st
+--	where f ss (Node ((s,t):ys)) =
+
+findSubstrings' :: String -> SuffixTree -> [Int]
+test s (Node ((a,t):ys))
+	| isPrefix s a = getIndices t
+	| isPrefix a s = test (removePrefix a s) t
+test s (Node (_:ys)) = test s (Node ys)
+test s _ = []
