@@ -57,7 +57,7 @@ insert (s,i) st = Node (f (s, i) st)
 		f (s , i) (Node nds)
 			| (foldr (\x -> (||) (p s (fst x))) False nds)  = foldr (\x ->  (:) (g (s , i) x)) [] nds
 		f (s , i) (Node nds) = (s , Leaf i) : nds
-		
+
 		g (s, i) ([] , Leaf n) = ("" , Leaf n)
 		g (s, i) (ns , Leaf n)
 		   | isPrefix ns s = (ns , Node ([(removePrefix ns s , (Leaf i)) , ("" , (Leaf n) )]) )
@@ -65,19 +65,29 @@ insert (s,i) st = Node (f (s, i) st)
 		   | isPrefix ns s  && (ns /= []) = (ns , (insert ((removePrefix ns s) , i) nt))
 		   -- | isPrefix s ns = ("hola" , nt) -- Nunca cae este caso Dejo porsia me equivoco
 		g _ (ns , nt) = (ns , nt)
-		
+
 		p s ns =  (isPrefix ns s) && (ns /= []) -- (isPrefix s ns) ||
 
 buildTree :: String -> SuffixTree
-buildTree s = (Node [])
+buildTree s = foldr (\x -> (insert (x , f x))) (Node []) (suffixes s) --como llevo un contador de en que iteracion voy ???
+	where
+		t = length s
+		f xs = t - length xs -- no me gusta tener que hacer esto, debe haber una mejor forma
+
+badBuildTree :: String -> SuffixTree
+badBuildTree s = f s 0
+	where
+	   f [] n = Node [] 
+	   f s n = insert (s , n) (f (tail s) (n+1))
+	   
 
 t = Node([])
 a = insert ("a" , 5) t
-na = insert ("ca" , 4) a
-ana = insert ("aca" , 3) na
-nana = insert ("maca" , 2) ana
-anana = insert ("amaca" , 1) nana -- Falla buscanco am
-banana = insert ("bamaca" , 0) anana
+na = insert ("na" , 4) a
+ana = insert ("ana" , 3) na
+nana = insert ("nana" , 2) ana
+anana = insert ("anana" , 1) nana
+banana = insert ("banana" , 0) anana
 
 -- Node [("banana",Leaf 0),
 --	  ("na",Node [("",Leaf 4),("na",Leaf 2)]),
