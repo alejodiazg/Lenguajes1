@@ -34,22 +34,70 @@ findSubstrings :: String -> String -> [Int]
 findSubstrings [] _  = []
 findSubstrings xs ys = f xs ys 0
 	where
-		f _ [] _= []
+		f _ [] _             = []
 		f xs ys n
    		  | (isPrefix xs ys) = n : f xs (tail ys) (n+1)
-		f xs ys n = f xs (tail ys) (n+1)
+		f xs ys n            = f xs (tail ys) (n+1)
 
 getIndices :: SuffixTree -> [Int]
 getIndices (Node ((s,t):ys)) = foldr (\x -> (++) (getIndices (snd x))) (getIndices t) ys
-getIndices (Leaf n) = [n]
+getIndices (Leaf n)          = [n]
 
-
---findSubstrings' s st = f s st
---	where f ss (Node ((s,t):ys)) =
 
 findSubstrings' :: String -> SuffixTree -> [Int]
-test s (Node ((a,t):ys))
-	| isPrefix s a = getIndices t
-	| isPrefix a s = test (removePrefix a s) t
-test s (Node (_:ys)) = test s (Node ys)
-test s _ = []
+findSubstrings' s (Node ((a,t):ys))
+	 | isPrefix s a             = getIndices t
+	 | isPrefix a s             = findSubstrings' (removePrefix a s) t
+findSubstrings' s (Node (_:ys)) = findSubstrings' s (Node ys)
+findSubstrings' s _             = []
+
+insert :: (String,Int) -> SuffixTree -> SuffixTree
+insert (s,i) st = Node (f (s, i) st)
+	where
+		f (s , i) (Node nds)
+			| (foldr (\x -> (||) (p s (fst x))) False nds)  = foldr (\x ->  (:) (g (s , i) x)) [] nds
+		f (s , i) (Node nds) = (s , Leaf i) : nds
+		g (s, i) ([] , Leaf n) = ("" , Leaf n)
+		g (s, i) (ns , Leaf n)
+		   | isPrefix ns s = (ns , Node ([(removePrefix ns s , (Leaf i)) , ("" , (Leaf n) )]) )
+		g (s , i) (ns , nt)
+		   | isPrefix ns s  && (ns /= []) = (ns , (insert ((removePrefix ns s) , i) nt))
+		   -- | isPrefix s ns = ("hola" , nt) Nunca cae este caso Dejo porsia me equivoco
+		g _ (ns , nt) = (ns , nt)
+		p s ns =  (isPrefix ns s) -- (isPrefix s ns) ||
+
+buildTree :: String -> SuffixTree
+buildTree s = (Node [])
+
+t = Node([])
+a = insert ("a" , 5) t
+na = insert ("na" , 4) a
+ana = insert ("ana" , 3) na
+nana = insert ("nana" , 2) ana
+anana = insert ("anana" , 1) nana
+banana = insert ("banana" , 0) anana
+
+-- Node [("banana",Leaf 0),
+--	  ("na",Node [("",Leaf 4),("na",Leaf 2)]),
+--	  ("a", Node [
+--	  	           ("",Leaf 5),
+--	  	           ("na",Node [
+--	  	           	            ("",Leaf 3),
+--	  	           	            ("na",Leaf 1)
+--	  	           	          ]
+--	  	            )
+--	  	         ])
+--	 ]
+
+-- Node [("banana",Leaf 0),
+--      ("na",Node [("na",Leaf 2),("",Leaf 4)]),
+ --     ("a", Node [   
+--      	             ("",Leaf 5)
+--      	             ("na", Node [
+--	      	             	       ("na",Leaf 1),
+--	      	             	       ("",Leaf 3)
+ --     	             			 ]
+ --     	              ),
+ --     	             
+ --     	         ])
+ --    ]
