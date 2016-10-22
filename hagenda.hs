@@ -8,6 +8,7 @@ data Picture = Picture {
 				pixels :: [[Char]]
 			} deriving (Show)
 
+
 type Day    = Int -- Suponga que está entre 1 y 31
 type Year   = Int -- Suponga que es positivo
 data Month  = Enero
@@ -32,6 +33,16 @@ data DayName = Domingo
 		     | Viernes
 		     | Sabado
 		     deriving (Show,Eq,Ord,Enum)
+
+
+--data Evento = Evento {
+--				year        :: Year,
+--				month       :: Month,
+--				day         :: Day,
+--				nth         :: Int,
+--				description :: String
+--			 } deriving (Show,Read)
+
 
 
 pixel :: Char -> Picture
@@ -142,8 +153,33 @@ day d m y = toEnum(mod ((fromEnum (fstday m y)::Int) - 1  + d) 7)::DayName
 rjustify :: Int -> String -> String
 rjustify n s = foldr (:) s (replicate n (' '))
 
---dnames :: Picture
---dnames =  
+dnames :: Picture
+dnames = spread $ map (\x -> row $ rjustify 2 (take 2 (show x))) [Domingo .. Sabado]
+
+banner :: Month -> Year -> Picture
+banner m y = row (rjustify (ld - lh) h)
+	where
+		ld = width dnames
+		lh = length h
+		h = show m ++ (' ' : show y)
+
+heading :: Month -> Year -> Picture
+heading m y = banner m y `above` dnames
+
+--Desvío
+
+group :: Int -> [a] -> [[a]]
+group _ [] = []
+group n xs 
+	| n  > 0 = (take n xs) : (group n(drop n xs))
+	| otherwise = error "El entero debe ser positivo."
+
+-- Eventos en la agenda
+
+
+
+	
+
 
 
 
