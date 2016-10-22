@@ -72,18 +72,14 @@ buildTree :: String -> SuffixTree
 buildTree s = foldr (\x -> (insert (x , f x))) (Node []) (suffixes s) --como llevo un contador de en que iteracion voy ???
 	where
 		t = length s
-		f xs = t - length xs -- no me gusta tener que hacer esto, debe haber una mejor forma
+		f xs = t - length xs -- no me gusta tener que hacer esto, debe haber una mejor forma 
 
 badBuildTree :: String -> SuffixTree
 badBuildTree s = f s 0
 	where
 	   f [] n = Node [] 
 	   f s n = insert (s , n) (f (tail s) (n+1))
-
-fecha
-d m a = f (fstdays a) fromEnum(m)::Int - 1
-	f (x:xs) 0 = toEnum(mod (x + d - 1) 7)::DayName
-	f (x:xs) n = f xs (n-1) 
+	   
 
 t = Node([])
 a = insert ("a" , 5) t
@@ -92,7 +88,6 @@ ana = insert ("ana" , 3) na
 nana = insert ("nana" , 2) ana
 anana = insert ("anana" , 1) nana
 banana = insert ("banana" , 0) anana
-
 
 -- Node [("banana",Leaf 0),
 --	  ("na",Node [("",Leaf 4),("na",Leaf 2)]),
