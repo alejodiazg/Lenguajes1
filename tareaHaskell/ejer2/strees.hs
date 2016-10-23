@@ -2,14 +2,6 @@ data SuffixTree = Leaf Int
                 | Node [(String,SuffixTree)]
                 deriving (Eq,Ord,Show)
 
-t1 :: SuffixTree
-t1 = Node [("banana", Leaf 0),
-		("a", Node [("na", Node [("na", Leaf 1),
-						("", Leaf 3)]),
-				("", Leaf 5)]),
-			("na", Node [("na", Leaf 2),
-				("", Leaf 4)])]
-
 isPrefix :: String -> String -> Bool
 isPrefix [] _           = True
 isPrefix _ []           = False
@@ -23,7 +15,7 @@ removePrefix _ ys                     = ys
 
 suffixes :: [a] -> [[a]]
 suffixes [] = []
-suffixes xs = xs :  suffixes (tail xs)
+suffixes xs = xs : suffixes (tail xs)
 
 isSubstring :: String -> String -> Bool
 isSubstring xs ys = foldr (f xs) False (suffixes ys)
@@ -57,59 +49,44 @@ insert (s,i) st = Node (f (s, i) st)
 		f (s , i) (Node nds)
 			| (foldr (\x -> (||) (p s (fst x))) False nds)  = foldr (\x ->  (:) (g (s , i) x)) [] nds
 		f (s , i) (Node nds) = (s , Leaf i) : nds
+		f (s , i) (Leaf n) = [(s , Leaf i) , ("" , Leaf n)]
+		g (s, i) (ns , nt)
+		    | ns /= []  &&  isPrefix ns s = (ns , insert (removePrefix ns s, i) nt)
+		    | ns /= []  &&  isPrefix [head ns] s  = ([head ns] , insert (tail s , i) nt)
+			| otherwise = (ns , nt)
+		p s ns =(ns /= []) && (( ([head ns] /= [] ) && (isPrefix [head ns] s)) )
 
-		g (s, i) ([] , Leaf n) = ("" , Leaf n)
-		g (s, i) (ns , Leaf n)
-		   | isPrefix ns s = (ns , Node ([(removePrefix ns s , (Leaf i)) , ("" , (Leaf n) )]) )
-		g (s , i) (ns , nt)
-		   | isPrefix ns s  && (ns /= []) = (ns , (insert ((removePrefix ns s) , i) nt))
-		   -- | isPrefix s ns = ("hola" , nt) -- Nunca cae este caso Dejo porsia me equivoco
-		g _ (ns , nt) = (ns , nt)
-
-		p s ns =  (isPrefix ns s) && (ns /= []) -- (isPrefix s ns) ||
 
 buildTree :: String -> SuffixTree
-buildTree s = foldr (\x -> (insert (x , f x))) (Node []) (suffixes s) --como llevo un contador de en que iteracion voy ???
+buildTree s = foldr (\x -> (insert (x , f x))) (Node []) (suffixes s)
 	where
 		t = length s
-		f xs = t - length xs -- no me gusta tener que hacer esto, debe haber una mejor forma 
+		f xs = t - length xs
 
-badBuildTree :: String -> SuffixTree
-badBuildTree s = f s 0
+longestRepeatedSubstring :: SuffixTree -> [String]
+longestRepeatedSubstring sf = unique $ longest 0 (filter (\x-> count x r > 1) r) [] 
 	where
-	   f [] n = Node [] 
-	   f s n = insert (s , n) (f (tail s) (n+1))
-	   
+		r = lrs sf
+		join s xs     = concat $ foldr (\x-> (:) (foldr (\y-> (:) (x++y) ) [] xs )) [] (suffixes s)
+		lrs (Node xs) = l 
+			where 
+				l = foldr (\x -> (++) ((fst x) : (join (fst x) (lrs (snd x) ) ) )) [] xs
+		lrs (Leaf n)  = []
+		count [] _ = 0
+		count _  [] = 0
+		count x (y:ys) = if x == y then 1 + (count x ys) else 0 + (count x ys)
+		unique xs = [x | (x,y) <- zip xs [0..], x `notElem` (take y xs)]
 
-t = Node([])
-a = insert ("a" , 5) t
-na = insert ("na" , 4) a
-ana = insert ("ana" , 3) na
-nana = insert ("nana" , 2) ana
-anana = insert ("anana" , 1) nana
-banana = insert ("banana" , 0) anana
+		longest  _ [] ys = ys
+		longest n (x:xs) ys
+			| length x > n = longest (length x) xs [x]
+			| length x == n =  longest n xs (x:ys)
+			| otherwise = longest n xs ys     
 
--- Node [("banana",Leaf 0),
---	  ("na",Node [("",Leaf 4),("na",Leaf 2)]),
---	  ("a", Node [
---	  	           ("",Leaf 5),
---	  	           ("na",Node [
---	  	           	            ("",Leaf 3),
---	  	           	            ("na",Leaf 1)
---	  	           	          ]
---	  	            )
---	  	         ])
---	 ]
-
--- Node [("banana",Leaf 0),
---      ("na",Node [("na",Leaf 2),("",Leaf 4)]),
- --     ("a", Node [   
---      	             ("",Leaf 5)
---      	             ("na", Node [
---	      	             	       ("na",Leaf 1),
---	      	             	       ("",Leaf 3)
- --     	             			 ]
- --     	              ),
- --     	             
- --     	         ])
- --    ]
+--t = Node([])
+--a = insert ("a" , 5) t
+--na = insert ("na" , 4) a
+--ana = insert ("ana" , 3) na
+--nana = insert ("nana" , 2) ana
+--anana = insert ("anana" , 1) nana
+--banana = insert ("banana" , 0) anana
