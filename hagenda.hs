@@ -1,4 +1,5 @@
 --PRIMERA PARTE
+import System.IO
 type Height = Int
 type Width  = Int
 
@@ -41,7 +42,7 @@ data DayName = Domingo
 --				day         :: Day,
 --				nth         :: Int,
 --				description :: String
---			 } deriving (Show,Read)
+--		 	} deriving (Show,Read)
 
 
 
@@ -175,6 +176,10 @@ group n xs
 	| otherwise = error "El entero debe ser positivo."
 
 -- Eventos en la agenda
+
+--loadEvents :: FilePath -> IO [Evento]
+--loadEvents pathName = undefined
+
 
 
 
