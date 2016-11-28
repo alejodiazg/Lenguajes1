@@ -6,7 +6,10 @@ module Folds
 		true
 	end
 
-	#FALTA EL FOLDR1 pensar como hacerlo
+	def foldr1 &b
+		e = foldr(nil) {|x , s| x}
+		foldr(e) {|x, s| b.call(x , s)}
+	end
 
 	def length
 		foldr(0) {|_ , s| s + 1}

@@ -80,7 +80,7 @@ class Console
 			if not (first.name == last.name)
 				return  nil
 			end
-			#first = first.interval.union(last.interval)
+			#first.interval = first.interval.union(last.interval)
 			return first
 		else
 			return nil
@@ -98,7 +98,7 @@ class Console
 			if not (first.name == last.name)
 				return  nil
 			end
-			#first = first.interval.interssection(last.interval)
+			#first.interval = first.interval.interssection(last.interval)
 			return first
 		else
 			return nil
@@ -115,6 +115,8 @@ class Console
 			first = stripSpaces(result.first)
 			last = stripSpaces(result.last)
 			
+			#DESCOMENTAR 
+			#last = RightInfinite.new(last.to_i , false)
 			return Values.new(first , last) #cambair este last por la creacion de la isntacion de la clase pertinente
 		else
 			return nil
@@ -131,7 +133,9 @@ class Console
 			first = stripSpaces(result.first)
 			last = stripSpaces(result.last)
 			
-			return Values.new(first , last) #cambair este last por la creacion de la isntacion de la clase pertinente
+			#DESCOMENTAR 
+			#last = RightInfinite.new(last.to_i , true)
+			return Values.new(first , last)
 		else
 			return nil
 		end		
@@ -147,7 +151,9 @@ class Console
 			first = stripSpaces(result.first)
 			last = stripSpaces(result.last)
 			
-			return Values.new(first , last) #cambair este last por la creacion de la isntacion de la clase pertinente
+			#DESCOMENTAR 
+			#last = LeftInfinite.new(last.to_i , false)
+			return Values.new(first , last)
 		else
 			return nil
 		end		
@@ -163,6 +169,8 @@ class Console
 			first = stripSpaces(result.first)
 			last = stripSpacesr(result.last)
 			
+			#DESCOMENTAR 
+			#last = LeftInfinite.new(last.to_i , true)
 			return Values.new(first , last) #cambair este last por la creacion de la isntacion de la clase pertinente
 		else
 			return nil
@@ -197,6 +205,43 @@ class Console
 		    		puts "Cerrando el programa"
 		    		exit
 		    	end
+
+		    	input = input.delete("\n")
+		    	result = split(input , '|')
+    			if not result.nil?
+    				first = stripSpaces(result.first)
+    				second = stripSpaces(result.last)
+    				fst_int = instance_variable_get("@#{first}")
+    				scd_int = instance_variable_get("@#{second}")
+
+    				if(fst_int && scd_int)
+    					puts("hago la union entre dos")
+    					#puts fst_int.union(scd_int).to_s
+    				else
+    					puts("una de las variables no fue creada previamente")
+    				end	
+    				
+					next
+				end
+
+				input = input.delete("\n")
+		    	result = split(input , '&')
+    			if not result.nil?
+    				first = stripSpaces(result.first)
+    				second = stripSpaces(result.last)
+    				fst_int = instance_variable_get("@#{first}")
+    				scd_int = instance_variable_get("@#{second}")
+    				
+    				if(fst_int && scd_int)
+    					puts("hago la interseccion entre dos")
+    					#puts fst_int.intersection(scd_int).to_s
+    				else
+    					puts("una de las variables no fue creada previamente")
+    				end	
+					next
+				end
+
+				puts "Error leyendo la linea"
 		    end
 
 		rescue => err
