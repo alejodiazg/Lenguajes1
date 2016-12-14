@@ -24,7 +24,7 @@ removeMove([K|Ks] , Ms , Mns , S) :- deleteOne(Ms , K , R , S1), ! , removeMove(
 deleteOne(Ks , K , Ks , 0) :- \+ safeK(K) , !.
 deleteOne([] , _ , [] , 0).
 deleteOne([K|Ks] , K , Ks , 1).
-deleteOne([K|Ks] , Kx , [K|Krs] , S) :-  deleteOne(Ks , Kx , Krs, S).
+deleteOne([K|Ks] , Kx , [K|Krs] , S) :-  deleteOne(Ks , Kx , Krs, S) , !.
 
 safeK(k(X,Y)) :- boardSize(N), ! , X >  0 ,  X =< N ,  Y > 0  ,  Y =< N.
 
@@ -55,33 +55,38 @@ downRight(k(X, Y) , k(Kx , Ky)) :- Kx is X + 2 , Ky is Y + 1.
 safeMoves(K , Ks) :- buildmoves(K , Kxs) , filterMoves(Kxs , Ks) , !.
 
 filterMoves([] , []).
-filterMoves([K|Ks] , [K|Kxs]) :- safeK(K) , ! , filterMoves(Ks , Kxs).
-filterMoves([K|Ks] , Kxs) :- \+ safeK(K) , ! , filterMoves(Ks , Kxs).
+filterMoves([K|Ks] , [K|Kxs]) :- safeK(K) , filterMoves(Ks , Kxs).
+filterMoves([K|Ks] , Kxs) :- \+ safeK(K) , filterMoves(Ks , Kxs).
 
 
-%Conteo , Estado resultante, Historia , Movimientos , Objetivo 
-dfs(Ncolocados , Colocados , Colocados , [] , Ncolocados , O) :-
+%Conteo , Estado resultante, Historia , Movimientos , Objetivo , Cantidad de posibilidades eliminadas hasta el momento
+dfs(Ncolocados , Colocados , Colocados , [] , Ncolocados , O , _) :-
 	Ncolocados = O.
 
 %colocando la ficha.
-dfs(Conteo, Resultado ,  Historia , [Movimiento|Movimientos] , Ncolocados , O) :-
+dfs(Conteo, Resultado ,  Historia , [Movimiento|Movimientos] , Ncolocados , O , Eliminados) :-
 	removeFromMoves(Movimiento  , Movimientos , Posibles , Removidos),
 	Ncol is Ncolocados + 1,
 	restan(Movimiento , R),
-	P is R + Ncol,
-	P >= O,
-	dfs(Conteo , Resultado , [Movimiento|Historia] , Posibles, Ncol , O).
+	Nop is Removidos + Eliminados,
+	%print(Nop),
+	%print(' '),
+	%print(Historia),
+	%print('\n'),
+	P is (R + Ncol) - Removidos, %deberia ser nop, por que no funciona asi?
+	P >= O - 1,
+	dfs(Conteo , Resultado , [Movimiento|Historia] , Posibles, Ncol , O , Nop).
 
 %sin colocar la ficha.
-dfs(Conteo , Resultado , Historia , [Movimiento|Movimientos] , Ncolocados ,O):-
-	Ncol is (Ncolocados + 0),
+dfs(Conteo , Resultado , Historia , [Movimiento|Movimientos] , Ncolocados ,O , Eliminados):-
 	restan(Movimiento , R),
-	P is R + Ncol,
-	P >= O,
-	dfs(Conteo, Resultado , Historia ,  Movimientos , Ncol , O).
+	Nop is Eliminados + 1,
+	P is R + Ncolocados - Nop,
+	P >= O -1 ,
+	dfs(Conteo, Resultado , Historia ,  Movimientos , Ncolocados , O , Nop).
 
 %calcula cuantas posiciones restan
-restan(k(X , Y) , R) :-boardSize(N) ,  T is N * N , F is (X -1) * N , C is Y - 1 , R is T - (F + C).
+restan(k(X , Y) , R) :- boardSize(N) ,  T is N * N , F is (X -1) * N , C is Y - 1 , R is T - (F + C).
 
 %genera una solucion optima (ver como eliminar esto).
 optima(K , 2 , 4).
@@ -95,8 +100,9 @@ even(k(X , Y)) :- R is (X + Y) mod 2 , R = 0.
 
 %Tama;o de tablero , Tama;o optimo de respuesta , Solucion. 
 arre(T , N , L) :- 
+	retractall(boardSize(_)),
 	asserta((boardSize(T))),
 	optima(k(1,1) , T , O) , ! ,
 	generarK(k(1,1) , T , Ks),
-	dfs(N , L , [] , Ks , 0 , O).
+	dfs(N , L , [] , Ks , 0 , O , 0).
 	
