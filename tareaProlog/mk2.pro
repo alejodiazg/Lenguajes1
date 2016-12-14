@@ -69,11 +69,8 @@ dfs(Conteo, Resultado ,  Historia , [Movimiento|Movimientos] , Ncolocados , O , 
 	Ncol is Ncolocados + 1,
 	restan(Movimiento , R),
 	Nop is Removidos + Eliminados,
-	%print(Nop),
-	%print(' '),
-	%print(Historia),
-	%print('\n'),
-	P is (R + Ncol) - Removidos, %deberia ser nop, por que no funciona asi?
+	boardSize(N),
+	P is (N * N) - Nop, %deberia ser nop, por que no funciona asi?
 	P >= O - 1,
 	dfs(Conteo , Resultado , [Movimiento|Historia] , Posibles, Ncol , O , Nop).
 
