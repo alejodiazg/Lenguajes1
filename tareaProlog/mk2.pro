@@ -1,6 +1,12 @@
-% A dynamic predicate for counting things.
+% Maximo de caballos
+%
+% Este archivo provee predicados para calcular la maxima cantidad
+% de caballos a colocar en un tablero y como colocarlos para que
+% no sea posible que se ataquen entre ellos
+%
+% @author Alejandro Diaz
+
 :- dynamic([boardSize/1]).
-% This is the main predicate to run.
 :- initialization(retractall(boardSize(_))).
 
 %generar todas las posiciones
@@ -93,7 +99,8 @@ optima(k(N , N) , N  , 1) :- N=\=2 , even(k(N , N )).
 optima(k(X,Y) , N  , S) :- N=\=2  , even(k(X,Y)), siguiente(k(X,Y) , N , K1) , optima(K1 , N , S1) , S is S1 + 1.
 optima(k(X,Y) , N  , S) :- N=\=2 ,  \+ even(k(X,Y)) , siguiente(k(X,Y) , N , K1) , optima(K1 , N , S).
 
-even(k(X , Y)) :- R is (X + Y) mod 2 , R = 0.
+even(k(X , Y)) :- 
+	R is (X + Y) mod 2 , R = 0.
 
 %Tama;o de tablero , Tama;o optimo de respuesta , Solucion. 
 arre(T , N , L) :- 
@@ -102,4 +109,43 @@ arre(T , N , L) :-
 	optima(k(1,1) , T , O) , ! ,
 	generarK(k(1,1) , T , Ks),
 	dfs(N , L , [] , Ks , 0 , O , 0).
-	
+
+
+inbounds(N , k(X , Y)) :- 0 < X , X =< N , 0 < Y , Y =< N.
+
+printVseparator(0) :- print('+\n').
+
+printVseparator(N) :- N > 0 , print('+-') , N1 is N - 1 , printVseparator(N1) , ! .
+
+printRow(N , F , L):-
+	F =< N,
+	printCell(F , 1 , L , N), 
+	F1 is F + 1, 
+	printRow(N , F1 , L) , !.
+
+printRow(N , F , L):-
+	F > N.
+
+printCell(F , C , L , N):-
+	C =< N,
+	member(k(F , C) , L) , !, 
+	print('|K'),
+	C1 is C + 1,
+	printCell(F , C1 , L , N) ,! .
+
+printCell(F , C , L , N):-
+	C =< N,
+	\+ member(k(F , C) , L) , !, 
+	print('| '),
+	C1 is C + 1,
+	printCell(F , C1 , L , N) ,! .
+
+printCell(_ , C ,  _ , N ):-
+	C > N,
+	print('|\n').
+
+caballito(N , L) :-
+	forall(member(K , L) , inbounds(N, K)),
+	printVseparator(N) ,
+	printRow(N , 1 , L),
+	printVseparator(N) .
